@@ -9,6 +9,7 @@ import verifyToken from './src/middleware/middleware.auth.js'
 //routes
 import authRoutes from './src/routes/auth.routes.js';
 import loginRoutes from './src/routes/login.routes.js';
+import dmsRoutes from './src/routes/dms.routes.js';
 
 
 const app = express();
@@ -24,6 +25,7 @@ app.get('/', (req, res) => {
 //api docs
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/auth', loginRoutes);
+app.use('/api/dms', dmsRoutes);
 app.use(verifyToken);
 app.get('/protected', (req, res) => {
 
