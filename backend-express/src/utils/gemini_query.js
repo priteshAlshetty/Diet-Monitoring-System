@@ -47,8 +47,9 @@ async function getMealMacros(params) {
                             protein_g: { type: "number" },
                             carbs_g: { type: "number" },
                             fat_g: { type: "number" },
+                            fiber_g: { type: "number" },
                         },
-                        required: ["calories_kcal", "protein_g", "carbs_g", "fat_g"],
+                        required: ["calories_kcal", "protein_g", "carbs_g", "fat_g", "fiber_g"],
                     },
                     ingredients: {
                         type: "array",
@@ -61,14 +62,15 @@ async function getMealMacros(params) {
                                 protein_g: { type: "number" },
                                 carbs_g: { type: "number" },
                                 fat_g: { type: "number" },
+                                fiber_g: { type: "number" },
                             },
-                            required: ["name", "quantity", "calories_kcal", "protein_g", "carbs_g", "fat_g"],
+                            required: ["name", "quantity", "calories_kcal", "protein_g", "carbs_g", "fat_g", "fiber_g"],
                         },
                     },
                 },
                 required: ["meal_name", "total", "ingredients"],
             },
-            thinkingConfig: { thinkingBudget: 0 },
+            thinkingConfig: { thinkingBudget: 10 },
         },
     };
 
@@ -180,11 +182,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     const runMealTests = async () => {
         for (let i = 0; i < meals.length; i += 1) {
             const meal = meals[i];
-            console.log(`\n--- Meal ${i + 1} ---`);
-            console.dir('input args : ');
-            console.dir(meal, { depth: null });
             const result = await getMealMacros({ meal_items: meal });
-            console.dir(result, { depth: null });
         }
     };
 

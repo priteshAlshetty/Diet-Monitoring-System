@@ -6,6 +6,7 @@ import swaggerSpec from './src/apiDocs/swagger.config.js';
 import swaggerUi from 'swagger-ui-express';
 //middlewares
 import verifyToken from './src/middleware/middleware.auth.js'
+import requestLogger from './src/middleware/requestLogger.js';
 //routes
 import authRoutes from './src/routes/auth.routes.js';
 import loginRoutes from './src/routes/login.routes.js';
@@ -14,6 +15,7 @@ import dmsRoutes from './src/routes/dms.routes.js';
 
 const app = express();
 
+app.use(requestLogger);
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
