@@ -1,5 +1,10 @@
-// controllers/mealController.js
+/**
+ * Gemini-powered meal macro estimation utility.
+ * Converts a meal item list into a prompt, sends it to the Gemini API,
+ * and returns the total nutrition and per-ingredient breakdown.
+ */
 import 'dotenv/config';
+import { pathToFileURL } from 'node:url';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_URL = process.env.GEMINI_URL;
@@ -112,6 +117,81 @@ async function getMealMacros(params) {
             'error': error.message
         }
     }
+}
+
+/**
+ * Direct-run sample test for local debugging.
+ * Calls the Gemini API 10 times with different meal combinations.
+ */
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+    const meals = [
+        [
+            { name: 'rice', quantity: 1, unit: 'cup' },
+            { name: 'dal', quantity: 200, unit: 'g' },
+            { name: 'spinach', quantity: 1, unit: 'cup' },
+        ],
+        [
+            { name: 'chapati', quantity: 2, unit: 'pieces' },
+            { name: 'chicken curry', quantity: 250, unit: 'g' },
+            { name: 'cucumber', quantity: 1, unit: 'cup' },
+        ]//,
+        // [
+        //     { name: 'oats', quantity: 60, unit: 'g' },
+        //     { name: 'milk', quantity: 250, unit: 'ml' },
+        //     { name: 'banana', quantity: 1, unit: 'piece' },
+        // ],
+        // [
+        //     { name: 'paneer', quantity: 150, unit: 'g' },
+        //     { name: 'brown rice', quantity: 1, unit: 'cup' },
+        //     { name: 'mixed vegetables', quantity: 1, unit: 'cup' },
+        // ],
+        // [
+        //     { name: 'bread', quantity: 2, unit: 'slices' },
+        //     { name: 'egg', quantity: 2, unit: 'pieces' },
+        //     { name: 'avocado', quantity: 1, unit: 'piece' },
+        // ],
+        // [
+        //     { name: 'quinoa', quantity: 1, unit: 'cup' },
+        //     { name: 'salmon', quantity: 180, unit: 'g' },
+        //     { name: 'peas', quantity: 1, unit: 'cup' },
+        // ],
+        // [
+        //     { name: 'yogurt', quantity: 200, unit: 'g' },
+        //     { name: 'granola', quantity: 50, unit: 'g' },
+        //     { name: 'strawberries', quantity: 1, unit: 'cup' },
+        // ],
+        // [
+        //     { name: 'tofu', quantity: 200, unit: 'g' },
+        //     { name: 'noodles', quantity: 1, unit: 'cup' },
+        //     { name: 'soy sauce', quantity: 20, unit: 'ml' },
+        // ],
+        // [
+        //     { name: 'sweet potato', quantity: 200, unit: 'g' },
+        //     { name: 'turkey', quantity: 180, unit: 'g' },
+        //     { name: 'green beans', quantity: 1, unit: 'cup' },
+        // ],
+        // [
+        //     { name: 'lentils', quantity: 200, unit: 'g' },
+        //     { name: 'whole wheat pasta', quantity: 1, unit: 'cup' },
+        //     { name: 'tomato sauce', quantity: 150, unit: 'g' },
+        // ],
+    ];
+
+    const runMealTests = async () => {
+        for (let i = 0; i < meals.length; i += 1) {
+            const meal = meals[i];
+            console.log(`\n--- Meal ${i + 1} ---`);
+            console.dir('input args : ');
+            console.dir(meal, { depth: null });
+            const result = await getMealMacros({ meal_items: meal });
+            console.dir(result, { depth: null });
+        }
+    };
+
+    runMealTests().catch((error) => {
+        console.error('Direct run failed:', error);
+        process.exitCode = 1;
+    });
 }
 
 export { getMealMacros };
