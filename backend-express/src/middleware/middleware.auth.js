@@ -1,32 +1,46 @@
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
+import { JWT_SECRET } from '../config/config.auth.js';
+import { httpError } from '../utils/httpError.js';
 
-dotenv.config();
+// Strict "Authorization: Bearer <token>" parsing (scheme is case-insensitive per RFC 7235).
+const BEARER_PATTERN = /^Bearer\s+(\S+)$/i;
 
-const SECRET_KEY = process.env.SECRET_KEY || 'your_secret_key';
-
+/**
+ * Verifies the JWT and sets `req.user`.
+ * Never writes a response itself: failures go to the central errorHandler via
+ * next(error), so every 401 has the same shape and is logged in one place.
+ */
 function verifyToken(req, res, next) {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const match = BEARER_PATTERN.exec(req.get('Authorization') || '');
 
-    if (!token) {
-        return res.status(401).json({ message: 'Access denied. No token provided.' });
+    if (!match) {
+        return next(
+            httpError(401, 'Access denied. No token provided.', { errorCode: 'TOKEN_MISSING' })
+        );
     }
 
     try {
-        const decoded = jwt.verify(token, SECRET_KEY);
-        req.user = decoded;
-        next();
+        // Pin the algorithm so a forged token can't pick a weaker one (e.g. "none").
+        req.user = jwt.verify(match[1], JWT_SECRET, { algorithms: ['HS256'] });
+        return next();
     } catch (error) {
+        // TokenExpiredError extends JsonWebTokenError, so it must be checked first.
         if (error.name === 'TokenExpiredError') {
-            return res.status(401).json({
-                success: false,
-                message: 'Token expired. Please login again.'
-            });
+            return next(
+                httpError(401, 'Token expired. Please login again.', {
+                    errorCode: 'TOKEN_EXPIRED',
+                    cause: error
+                })
+            );
         }
-        res.status(401).json({ success: false, message: 'Invalid token.' });
+        if (error instanceof jwt.JsonWebTokenError) {
+            return next(
+                httpError(401, 'Invalid token.', { errorCode: 'TOKEN_INVALID', cause: error })
+            );
+        }
+        // Anything else is unexpected: let it become a generic 500.
+        return next(error);
     }
 }
-
-
 
 export default verifyToken;
