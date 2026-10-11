@@ -1,5 +1,5 @@
 // Base HTTP client: adds the bearer token and normalises errors.
-const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3300";
+const BASE_URL = (import.meta.env.VITE_API_URL ?? "http://localhost:3300").replace(/\/$/, "");
 const TOKEN_KEY = "dms_token";
 
 export const tokenStore = {
@@ -9,7 +9,7 @@ export const tokenStore = {
 };
 
 // AuthContext registers a callback here so any 401 logs the user out.
-let onUnauthorized = () => {};
+let onUnauthorized = () => { };
 export const setUnauthorizedHandler = (fn) => { onUnauthorized = fn; };
 
 export async function request(path, { method = "GET", body, auth = true } = {}) {
@@ -17,10 +17,11 @@ export async function request(path, { method = "GET", body, auth = true } = {}) 
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
     headers: {
+      Accept: "*/*",
       "Content-Type": "application/json",
       ...(auth && token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: body === undefined ? undefined : JSON.stringify(body),
   });
 
   const text = await res.text();

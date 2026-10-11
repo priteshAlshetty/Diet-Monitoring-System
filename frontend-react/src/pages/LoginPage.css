@@ -29,9 +29,23 @@
   background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
   box-shadow: 0 10px 30px rgba(20, 60, 40, .10);
 }
+.login__form { display: grid; gap: 12px; }
 .login__card h2 { margin: 0; font-size: 1.5rem; }
 .login__card p { margin: 0; color: var(--muted); }
+.login__field-group { display: grid; gap: 6px; }
+.login__label { color: var(--ink); font-size: .9rem; font-weight: 600; }
+.login__password { position: relative; }
+.login__password .login__field { width: 100%; padding-right: 42px; }
+.login__password-toggle {
+  position: absolute; top: 50%; right: 8px; transform: translateY(-50%);
+  display: grid; place-items: center; width: 30px; height: 30px;
+  padding: 0; border: 0; background: transparent; color: var(--muted); cursor: pointer;
+}
+.login__password-toggle:hover { color: var(--leaf-dark); }
+.login__password-toggle:focus-visible { outline: 2px solid var(--leaf); outline-offset: 1px; border-radius: 4px; }
 .login__field { padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+.login__field--invalid { border-color: var(--err); box-shadow: 0 0 0 1px var(--err); }
+.login__validation { color: var(--err); font-size: .85rem; }
 .login__btn {
   padding: 11px; border: 0; border-radius: 8px; cursor: pointer;
   background: var(--leaf); color: #fff; font-weight: 600;
@@ -39,6 +53,11 @@
 .login__btn:hover:not(:disabled) { background: var(--leaf-dark); }
 .login__btn:disabled { opacity: .6; cursor: progress; }
 .login p.login__error { color: var(--err); min-height: 1.3em; font-size: .95rem; }
+.login__card p.login__notice { color: var(--leaf-dark); min-height: 1.3em; font-size: .95rem; }
+.login__card p.login__switch-text { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; font-size: .9rem; }
+.login__switch { padding: 0; border: 0; background: none; color: var(--leaf-dark); font: inherit; font-weight: 600; cursor: pointer; }
+.login__switch:hover:not(:disabled) { text-decoration: underline; }
+.login__switch:disabled { opacity: .6; cursor: progress; }
 .login p.login__demo, .login__card p.login__demo { font-size: .85rem; }
 
 @media (max-width: 900px) {
