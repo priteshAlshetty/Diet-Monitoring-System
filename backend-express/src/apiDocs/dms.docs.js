@@ -2,7 +2,7 @@
  * @swagger
  * tags:
  *   name: DMS
- *   description: Diet and meal management
+ *   description: Diet and meal management (requires a logged-in user)
  */
 
 /**
@@ -10,18 +10,18 @@
  * /api/dms/insertMeal:
  *   post:
  *     summary: Insert a meal and its ingredients
+ *     description: The meal is saved for the logged-in user (taken from the access cookie). Do not send a user_id; it is ignored.
  *     tags: [DMS]
- *     security: []
+ *     security:
+ *       - cookieAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required: [user_id, meal_type, mealData]
+ *             required: [meal_type, mealData]
  *             properties:
- *               user_id:
- *                 type: integer
  *               meal_type:
  *                 type: string
  *                 example: Breakfast
@@ -46,7 +46,6 @@
  *                     unit:
  *                       type: string
  *           example:
- *             user_id: 1
  *             meal_type: Breakfast
  *             meal_type_other: ''
  *             mealData:
@@ -78,12 +77,14 @@
  *                 total_fat_gm: 8.1
  *                 total_fiber_gm: 9.3
  *       400:
- *         description: Missing user_id, meal_type, or mealData
+ *         description: Missing meal_type or mealData
  *         content:
  *           application/json:
  *             example:
  *               success: false
  *               message: meal_type is required.
+ *       401:
+ *         description: Not logged in or access token expired (errorCode TOKEN_MISSING, TOKEN_EXPIRED or TOKEN_INVALID)
  *       500:
  *         description: Database or server error
  *         content:

@@ -7,6 +7,9 @@ const router = express.Router();
 
 // Express 5 forwards thrown errors / rejected promises to the central errorHandler,
 // so these handlers don't need their own try/catch.
+//
+// This whole router is mounted behind verifyToken in app.js, so req.user is always set here.
+// The user is ALWAYS taken from the token (req.user.id), never from the request body.
 
 // POST /api/dms/ai/meal-macros
 router.post('/ai/meal-macros', async (req, res) => {
@@ -25,22 +28,24 @@ router.post('/ai/meal-macros', async (req, res) => {
 
 // POST /api/dms/insertMeal
 router.post('/insertMeal', async (req, res) => {
-    const body = req.body ?? {};
-    const { mealData, user_id, meal_type } = body;
+    // Whitelist the fields we accept. Any user_id sent in the body is ignored.
+    const { mealData, meal_type, meal_type_other, eaten_at } = req.body ?? {};
 
     if (!Array.isArray(mealData) || mealData.length === 0) {
         throw httpError(400, 'At least one meal item is required.');
-    }
-
-    if (!user_id) {
-        throw httpError(400, 'user_id is required.');
     }
 
     if (typeof meal_type !== 'string' || !meal_type.trim()) {
         throw httpError(400, 'meal_type is required.');
     }
 
-    const result = await insertMealObject(body);
+    const result = await insertMealObject({
+        mealData,
+        meal_type,
+        meal_type_other,
+        eaten_at,
+        user_id: req.user.id   // from the verified access token
+    });
 
     if (!result?.success || !result.data) {
         throw httpError(500, 'Meal insert did not return a result.');

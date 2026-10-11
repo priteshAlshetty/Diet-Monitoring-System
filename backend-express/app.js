@@ -12,6 +12,11 @@ import { notFoundHandler, errorHandler } from './src/middleware/errorHandler.js'
 import authRoutes from './src/routes/auth.routes.js';
 import loginRoutes from './src/routes/login.routes.js';
 import dmsRoutes from './src/routes/dms.routes.js';
+//serve frontend
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const FRONTEND_DIST = path.join(__dirname, '../frontend-react/dist'); // adjust to your folder layout
 
 
 const app = express();
@@ -22,16 +27,17 @@ app.use(express.json());
 app.use(cookieParser());
 
 // ---------- Public routes ----------
-app.get('/', (req, res) => {
+app.get('/test', (req, res) => {
     res.send('Hello, World!');
 });
 
 //api docs
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+//------system routes----------
 app.use('/api/auth', loginRoutes);
-// TODO(security): this router is still public. To protect it, change to:
-//   app.use('/api/dms', verifyToken, dmsRoutes);
-app.use('/api/dms', dmsRoutes);
+app.use('/api/auth', authRoutes);
+//   
+app.use('/api/dms', verifyToken, dmsRoutes);
 
 // ---------- Protected routes ----------
 // verifyToken is applied per route/router (not globally), so it only guards
@@ -39,8 +45,14 @@ app.use('/api/dms', dmsRoutes);
 app.get('/protected', verifyToken, (req, res) => {
     res.send('OK');
 });
-app.use('/api/auth', verifyToken, authRoutes);
-
+//----------- Serve frontend ----------
+// Static files + SPA fallback: after the API routes, BEFORE notFoundHandler
+app.use(express.static(FRONTEND_DIST));
+//-------handle unknown URLs--------------
+app.get('/{*splat}', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();   // unknown API URLs still get a JSON 404
+    res.sendFile(path.join(FRONTEND_DIST, 'index.html'));
+});
 // ---------- Error handling (must be last, in this order) ----------
 app.use(notFoundHandler);
 app.use(errorHandler);
