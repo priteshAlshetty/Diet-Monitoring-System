@@ -1,41 +1,50 @@
-// STATUS: DUMMY DATA. To integrate, replace each function body with the REAL line
-// shown in its comment (and add: import { request } from "../api/client";).
-// Keep the returned JSON shape the same and no component needs to change.
+// STATUS: getDashboardData is REAL (GET /api/dms/dailySummary).
+// deleteMeal is not available yet: the backend has no delete endpoint.
+import { request } from "../api/client";
 
-// Dummy-only in-memory list so the delete button works in the demo. Remove with the dummy data.
-let meals = [
-  { id: 1, meal_type: "Breakfast", time: "08:00", name: "Oats with Banana & Nuts", calories: 320, protein: 12, carbs: 48, fats: 10 },
-  { id: 2, meal_type: "Lunch", time: "13:00", name: "Roti, Dal, Mixed Veg", calories: 450, protein: 18, carbs: 70, fats: 12 },
-  { id: 3, meal_type: "Snack", time: "16:00", name: "Greek Yogurt with Berries", calories: 180, protein: 14, carbs: 20, fats: 3 },
-  { id: 4, meal_type: "Dinner", time: "20:00", name: "Paneer Bhurji with Roti", calories: 290, protein: 18, carbs: 32, fats: 12 },
-];
+const r1 = (n) => Math.round(Number(n || 0) * 10) / 10;
 
-// GET /api/dms/dashboard?user_id=1&date=2026-09-27
-export async function getDashboardData({ userId, date }) {
-  // REAL: return request(`/api/dms/dashboard?user_id=${userId}&date=${date}`);
+// Backend sends "08:45 PM"; MealsList expects "20:45".
+function to24h(t) {
+  const m = /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i.exec(String(t ?? "").trim());
+  if (!m) return t ?? "";
+  let h = Number(m[1]) % 12;
+  if (m[3].toUpperCase() === "PM") h += 12;
+  return `${String(h).padStart(2, "0")}:${m[2]}`;
+}
 
-  const sum = (key) => meals.reduce((total, m) => total + m[key], 0);
-  const base = new Date(`${date}T00:00:00`);
-  const trend = [1310, 1420, 1380, 1500, 1330, 1470, 1520].map((calories, i) => {
-    const d = new Date(base);
-    d.setDate(base.getDate() - (6 - i));
-    return { date: d.toLocaleDateString("en-CA"), calories };
-  });
+// Backend names (protein_g, fat_g) -> names the dashboard components use.
+const macros = (x) => ({
+  calories: r1(x.calories),
+  protein: r1(x.protein_g),
+  carbs: r1(x.carbs_g),
+  fats: r1(x.fat_g),
+});
+
+// GET /api/dms/dailySummary?date=YYYY-MM-DD
+// The user comes from the access cookie, so no user_id is sent.
+export async function getDashboardData({ date }) {
+  const res = await request(`/api/dms/dailySummary?date=${encodeURIComponent(date)}`);
+  const d = res?.data;
+  if (!d) throw new Error("Dashboard data was not returned.");
 
   return {
-    date,
-    goals: { calories: 1800, protein: 80, carbs: 200, fats: 60 },
-    totals: { calories: sum("calories"), protein: sum("protein"), carbs: sum("carbs"), fats: sum("fats") },
-    meals: [...meals],
-    trend,
-    weight: { current: 80.0, change30d: -2.5 },
+    date: d.date,
+    goals: macros(d.goals),
+    totals: macros(d.totals),
+    meals: d.meals.map((m) => ({
+      id: m.meal_id,
+      meal_type: m.meal_type,
+      name: m.meal_name,
+      time: to24h(m.time),
+      ...macros(m),
+    })),
+    // No `weight` here: the backend doesn't have weight data yet.
   };
 }
 
-// DELETE /api/dms/meals/:id
-export async function deleteMeal(id) {
-  // REAL: return request(`/api/dms/meals/${id}`, { method: "DELETE" });
-
-  meals = meals.filter((m) => m.id !== id);
-  return { success: true };
+// No backend endpoint yet. Throwing makes the dashboard show a message
+// instead of pretending the meal was deleted.
+export async function deleteMeal() {
+  throw new Error("Deleting meals is not available yet.");
 }

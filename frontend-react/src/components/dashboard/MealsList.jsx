@@ -25,7 +25,10 @@ export default function MealsList({ meals, onDelete }) {
             <li key={m.id} className="meal-row">
               <img src={mealImage(m.meal_type)} alt="" width="64" height="64" />
               <div className="meal-row__body">
-                <span className="meal-row__time">{formatTime(m.time)}</span>
+                <div className="meal-row__meta">
+                  <span className="meal-row__time">{formatTime(m.time)}</span>
+                  <span className="meal-row__type">{m.meal_type}</span>
+                </div>
                 <strong>{m.name}</strong>
                 <span className="meal-row__macros">
                   {m.calories} kcal | {m.protein} g P | {m.carbs} g C | {m.fats} g F

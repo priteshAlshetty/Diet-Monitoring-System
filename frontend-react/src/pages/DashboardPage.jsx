@@ -86,7 +86,7 @@ export default function DashboardPage() {
       <aside className="dash__side">
         <QuickActions />
         <TodaysGoals totals={data.totals} goals={data.goals} />
-        <WeightCard weight={data.weight} />
+        {data.weight && <WeightCard weight={data.weight} />}
       </aside>
 
       <div className="dash__wide">

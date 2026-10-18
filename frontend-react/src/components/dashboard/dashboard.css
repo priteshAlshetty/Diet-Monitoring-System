@@ -157,3 +157,22 @@
 /* macro donut fills its column and centres its content */
 .dash__pair > .donut { display: flex; flex-direction: column; }
 .dash__pair > .donut .donut__body { flex: 1; }
+
+/* meal type tag */
+.meal-row__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.meal-row__type {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--leaf-tint);
+  color: var(--leaf-dark);
+  font-size: .75rem;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
