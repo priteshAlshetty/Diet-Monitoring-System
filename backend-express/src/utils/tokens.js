@@ -14,7 +14,7 @@ import {
 const ALG = 'HS256';
 
 // Only these fields go into a token. Anything else in `user` is ignored.
-const identity = (user) => ({ id: user.id, username: user.username });
+const identity = (user) => ({ id: Number(user.id), username: user.username });
 
 function signAccess(user) {
     return jwt.sign({ ...identity(user), typ: 'access' }, JWT_ACCESS_SECRET, {

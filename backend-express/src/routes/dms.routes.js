@@ -1,6 +1,8 @@
 import express from 'express';
 import { getMealMacros } from '../utils/gemini_query.js';
 import { insertMealObject } from '../controllers/dms/insertMeal.controller.js';
+import { getDailyMacros } from "../controllers/dms/getCaloriesData.controller.js";
+import { getDailySummary } from '../controllers/dms/dailySummary.controller.js';
 import { httpError } from '../utils/httpError.js';
 
 const router = express.Router();
@@ -56,6 +58,34 @@ router.post('/insertMeal', async (req, res) => {
         message: 'Meal info uploaded successfully.',
         data: result.data
     });
+});
+
+// GET /api/dms/dailyMacros?days=7
+router.get("/dailyMacros", async (req, res) => {
+    try {
+        const { days } = req.query;                // N comes from the URL
+        const userId = req.user.id;                // user comes from the access token
+
+        const data = await getDailyMacros({ userId, days });
+
+        return res.status(200).json({ success: true, days: data.length, data });
+    } catch (err) {
+        return res.status(err.status || 500).json({ success: false, message: err.message });
+    }
+});
+
+// GET /api/dms/daily-summary?date=YYYY-MM-DD&tz=Asia/Kolkata
+// Dashboard data (totals, goals, progress, macro breakdown, meal list) for the logged-in user.
+// Both query params are optional: date defaults to today, tz to DEFAULT_TIMEZONE.
+router.get('/dailySummary', async (req, res) => {
+    console.log('---req.user =', req.user);
+    const data = await getDailySummary({
+        userId: req.user.id,   // from the verified access token
+        date: req.query.date
+    });
+
+    res.set('Cache-Control', 'no-store');   // per-user data, never cache
+    return res.status(200).json({ success: true, data });
 });
 
 export default router;

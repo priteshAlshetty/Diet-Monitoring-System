@@ -44,7 +44,14 @@ export default function DashboardPage() {
   };
 
   if (error && !data) return <p className="state state--error" role="alert">{error}</p>;
-  if (!data) return <p className="state">Loading your dashboard…</p>;
+  if (!data) return (
+  <div className="authloader" role="status" aria-live="polite">
+    <div className="authloader__box">
+      <span className="authloader__spinner" aria-hidden="true" />
+      <strong>Loading your dashboard…</strong>
+    </div>
+  </div>
+);
 
   const rawName = (user?.name ?? user?.username ?? "").split(" ")[0];
   const firstName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
@@ -70,11 +77,10 @@ export default function DashboardPage() {
 
         <div className="dash__pair">
           <MealsList meals={data.meals} onDelete={handleDelete} />
-          <div className="dash__col">
-            <MacroDonut totals={data.totals} />
-            <CalorieTrend trend={data.trend} goal={data.goals.calories} />
-          </div>
+          <MacroDonut totals={data.totals} />
         </div>
+
+        <CalorieTrend goal={data.goals.calories} />
       </div>
 
       <aside className="dash__side">

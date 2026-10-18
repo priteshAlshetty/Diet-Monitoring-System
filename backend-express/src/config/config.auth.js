@@ -21,7 +21,7 @@ const JWT_ACCESS_SECRET = required('JWT_ACCESS_SECRET');
 const JWT_REFRESH_SECRET = required('JWT_REFRESH_SECRET');
 
 // Seconds. jsonwebtoken takes seconds, cookies need ms (multiplied below).
-const ACCESS_TTL_SECONDS = 15 * 60;            // 15 minutes
+const ACCESS_TTL_SECONDS = 60 * 60;            // 60 minutes
 const REFRESH_TTL_SECONDS = 7 * 24 * 60 * 60;  // 7 days
 
 const ACCESS_COOKIE = 'access_token';
@@ -63,3 +63,4 @@ export {
     refreshCookieOptions,
     SALT_ROUNDS
 };
+

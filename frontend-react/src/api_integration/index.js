@@ -3,4 +3,5 @@ export * from "./authApi";
 export * from "./mealApi";
 export * from "./dashboardApi";
 export * from "./proteinApi";
+export * from "./trendApi";
 export * from "./profileApi";

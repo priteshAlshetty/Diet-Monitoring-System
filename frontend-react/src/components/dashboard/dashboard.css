@@ -1,6 +1,6 @@
 .dash { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; padding: 20px 28px 40px; align-items: start; }
 .dash__main, .dash__side { display: grid; gap: 20px; min-width: 0; }
-.dash__pair { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.dash__pair { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: stretch; }
 .dash__col { display: grid; gap: 20px; min-width: 0; }
 
 .card { background: var(--paper); border-radius: var(--radius); padding: 20px; box-shadow: 0 1px 3px rgba(20,40,30,.06); }
@@ -62,7 +62,8 @@
 .donut__legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
 .donut__legend li { display: grid; grid-template-columns: 12px 64px auto; align-items: center; gap: 8px; font-size: .95rem; }
 .donut__legend i { width: 12px; height: 12px; border-radius: 50%; }
-.trend svg { width: 100%; height: auto; display: block; }
+.trend__box { min-width: 0; }
+.trend__svg { display: block; width: 100%; height: auto; }
 
 /* side cards */
 .actions { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
@@ -115,3 +116,44 @@
 .pm__sub { margin: 14px 0 4px; color: var(--muted); font-size: .9rem; }
 
 .action--orange { background: var(--orange-tint); color: #b7791f; }
+
+/* calorie trend: custom range dropdown */
+.dd { position: relative; }
+.dd__btn {
+  white-space: nowrap; flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
+  background: var(--paper); color: var(--ink); border: 1px solid var(--line);
+  border-radius: 8px; font-size: .9rem; cursor: pointer;
+}
+.dd__btn:hover, .dd__btn[aria-expanded="true"] { border-color: var(--leaf); }
+.dd__chev { color: var(--muted); transition: transform .15s; }
+.dd__chev--up { transform: rotate(180deg); }
+.dd__menu {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 20; min-width: 210px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+  padding: 6px; box-shadow: 0 10px 30px rgba(20, 40, 30, .15);
+}
+.dd__menu ul { list-style: none; margin: 0; padding: 0; }
+.dd__opt {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 8px 10px; border-radius: 6px; font-size: .92rem; cursor: pointer;
+}
+.dd__opt:hover, .dd__opt:focus-visible { background: var(--leaf-tint); outline: none; }
+.dd__opt--on { color: var(--leaf-dark); font-weight: 600; }
+.dd__custom { margin-top: 6px; padding: 10px; border-top: 1px solid var(--line); display: grid; gap: 6px; }
+.dd__custom label { font-size: .8rem; color: var(--muted); }
+.dd__custom-row { display: flex; gap: 8px; }
+.dd__custom input {
+  width: 100%; min-width: 0; padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px;
+}
+.dd__custom input[aria-invalid="true"] { border-color: var(--err); }
+.dd__apply {
+  padding: 7px 14px; border: 0; border-radius: 6px; background: var(--leaf);
+  color: #fff; font-weight: 600; cursor: pointer;
+}
+.dd__apply:hover { background: var(--leaf-dark); }
+.dd__error { margin: 0; color: var(--err); font-size: .82rem; }
+
+/* macro donut fills its column and centres its content */
+.dash__pair > .donut { display: flex; flex-direction: column; }
+.dash__pair > .donut .donut__body { flex: 1; }

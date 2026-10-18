@@ -22,7 +22,15 @@ const FRONTEND_DIST = path.join(__dirname, '../frontend-react/dist'); // adjust 
 const app = express();
 
 app.use(requestLogger);
-app.use(cors());
+
+const allowedOrigins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3300",
+    "http://127.0.0.1:3300",
+];
+
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 

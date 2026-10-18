@@ -21,7 +21,8 @@ router.post('/login', async (req, res) => {
     if (!username || !password) {
         throw httpError(400, 'Missing required parameters');
     }
-
+    // TEMPORARY: 1s artificial delay to test the frontend loader. Remove after testing.
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     // login() throws a 401 httpError for bad credentials,
     // so a returned result is always a success.
     const result = await login({ username, password });
@@ -29,7 +30,7 @@ router.post('/login', async (req, res) => {
     // Tokens go in HttpOnly cookies, NOT in the JSON body.
     setAuthCookies(res, result.user);
 
-    res.status(200).json({
+    return res.status(200).json({
         success: true,
         message: result.message,
         user: result.user

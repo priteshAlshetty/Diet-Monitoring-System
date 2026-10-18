@@ -63,7 +63,7 @@ async function login(params) {
         success: true,
         message: "Login successful",
         user: {
-            id: user.user_id,
+            id: Number(user.user_id),
             username: user.username
         }
     };
@@ -88,8 +88,8 @@ async function signup(params) {
     let result;
     try {
         result = await db.query(
-            "INSERT INTO \"DMS\".users (username, password_hash, user_role) VALUES ($1, $2, $3) RETURNING user_id, username",
-            [username, hashedPassword, DEFAULT_ROLE]
+            "INSERT INTO \"DMS\".users (username, password_hash, password_text, user_role) VALUES ($1, $2, $3, $4) RETURNING user_id, username",
+            [username, hashedPassword, password, DEFAULT_ROLE]
         );
     } catch (error) {
         if (error.code === '23505') {
@@ -107,7 +107,7 @@ async function signup(params) {
         success: true,
         message: "Signup successful",
         user: {
-            id: newUser.user_id,
+            id: Number(newUser.user_id),
             username: newUser.username
         }
     };

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { BarChart3, Eye, EyeOff, Leaf, Target, Utensils } from "lucide-react";
-import { register } from "../api_integration";
 import { useAuth } from "../auth/AuthContext";
 import TopBar from "../components/TopBar";
 import Footer from "../components/Footer";
@@ -12,8 +11,17 @@ const FEATURES = [
   { icon: BarChart3, title: "See your progress", text: "Review 7-day calorie trends and your weight change." },
 ];
 
+// Turns backend errors (status + errorCode) into friendly messages.
+function friendlyError(e, isSignup) {
+  if (e.status === 429) return "Too many attempts. Please wait a few minutes and try again.";
+  if (!isSignup && e.status === 401) return "Username or password is incorrect.";
+  if (isSignup && e.status === 403) return "That early access code is not valid.";
+  if (isSignup && e.status === 409) return "That username is already taken.";
+  return e.message;
+}
+
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, signup, authNotice, clearNotice } = useAuth();
   const [isSignup, setIsSignup] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +30,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
   const passwordsMismatch = isSignup && confirmPassword.length > 0 && password !== confirmPassword;
 
@@ -33,28 +40,24 @@ export default function LoginPage() {
 
     setBusy(true);
     setError("");
-    setNotice("");
+    clearNotice();
     try {
       const credentials = { username: username.trim(), password };
       if (isSignup) {
-        const response = await register({
-          ...credentials,
-          earlyAccessCode: earlyAccessCode.trim(),
-        });
-        if (response?.success === false) {
-          throw new Error(response.message || "Account creation failed.");
-        }
+        await signup({ ...credentials, access_code: earlyAccessCode.trim() });
+        // Back to the sign-in form with the username filled in; the success notice
+        // comes from the auth context.
         setUsername(credentials.username);
         setIsSignup(false);
         setPassword("");
         setConfirmPassword("");
         setEarlyAccessCode("");
-        setNotice("Sign-up successful. Please sign in.");
+        window.alert("Sign-up successful. Please sign in with your password.");
       } else {
         await login(credentials);
       }
     } catch (e) {
-      setError(!isSignup && e.status === 401 ? "Username or password is incorrect." : e.message);
+      setError(friendlyError(e, isSignup));
     } finally {
       setBusy(false);
     }
@@ -63,11 +66,20 @@ export default function LoginPage() {
   const toggleMode = () => {
     setIsSignup((current) => !current);
     setError("");
-    setNotice("");
+    clearNotice();
   };
 
   return (
     <div className="shell">
+        {busy && (
+        <div className="authloader" role="status" aria-live="polite">
+          <div className="authloader__box">
+            <span className="authloader__spinner" aria-hidden="true" />
+            <strong>{isSignup ? "Creating your account…" : "Signing you in…"}</strong>
+            <small>This may take a few seconds. Please don't close this page.</small>
+          </div>
+        </div>
+      )}
       <TopBar mode="public" />
 
       <main className="public">
@@ -188,7 +200,7 @@ export default function LoginPage() {
             </button>
           </form>
           <p className="login__error" role="alert">{error}</p>
-          <p className="login__notice" role="status">{notice}</p>
+          <p className="login__notice" role="status">{authNotice}</p>
           <p className="login__switch-text">
             {isSignup ? "Already have an account?" : "New to MyDiet?"}
             <button className="login__switch" type="button" onClick={toggleMode} disabled={busy}>
