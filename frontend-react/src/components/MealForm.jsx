@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { insertMeal } from "../api_integration";
 import MealSavedModal from "./MealSavedModal";
+import { v4 as uuidv4 } from 'uuid';
 import "./MealForm.css";
 
 const MEAL_TYPES = ["Breakfast", "Lunch", "Dinner", "Snack", "Other"];
 const UNITS = ["g", "kg", "ml", "l", "piece", "cup", "tbsp", "tsp"];
-const blankItem = () => ({ id: crypto.randomUUID(), name: "", quantity: "", unit: "g" });
+const blankItem = () => ({ id: uuidv4(), name: "", quantity: "", unit: "g" });
 const DEFAULT_ROWS = 3;
 const blankItems = () => Array.from({ length: DEFAULT_ROWS }, blankItem);
 
