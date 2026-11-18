@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { mealImage } from "./mealImages";
+import MealDetailsModal from "./MealDetailsModal";
 
 const formatTime = (hhmm) => {
   const [h, m] = String(hhmm).split(":").map(Number);
@@ -10,6 +12,10 @@ const formatTime = (hhmm) => {
 };
 
 export default function MealsList({ meals, onDelete }) {
+  // Keep only the id; if the meal is deleted and the list reloads, the modal closes by itself.
+  const [selectedId, setSelectedId] = useState(null);
+  const selected = meals.find((m) => m.id === selectedId) ?? null;
+
   return (
     <section className="card meals">
       <div className="card__head">
@@ -22,7 +28,20 @@ export default function MealsList({ meals, onDelete }) {
       ) : (
         <ul className="meals__list">
           {meals.map((m) => (
-            <li key={m.id} className="meal-row">
+            <li
+              key={m.id}
+              className="meal-row meal-row--clickable"
+              tabIndex={0}
+              role="button"
+              aria-label={`View details of ${m.name}`}
+              onClick={() => setSelectedId(m.id)}
+              onKeyDown={(e) => {
+                if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
+                  e.preventDefault();
+                  setSelectedId(m.id);
+                }
+              }}
+            >
               <img src={mealImage(m.meal_type)} alt="" width="64" height="64" />
               <div className="meal-row__body">
                 <div className="meal-row__meta">
@@ -37,12 +56,20 @@ export default function MealsList({ meals, onDelete }) {
               <button className="icon-btn" disabled title="Editing is not available yet" aria-label={`Edit ${m.name}`}>
                 <Pencil size={18} />
               </button>
-              <button className="icon-btn icon-btn--danger" onClick={() => onDelete(m)} aria-label={`Delete ${m.name}`}>
+              <button className="icon-btn icon-btn--danger" onClick={(e) => { e.stopPropagation(); onDelete(m); }} aria-label={`Delete ${m.name}`}>
                 <Trash2 size={18} />
               </button>
             </li>
           ))}
         </ul>
+      )}
+
+      {selected && (
+        <MealDetailsModal
+          meal={selected}
+          timeLabel={formatTime(selected.time)}
+          onClose={() => setSelectedId(null)}
+        />
       )}
     </section>
   );

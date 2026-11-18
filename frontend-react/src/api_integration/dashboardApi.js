@@ -68,5 +68,19 @@ export async function getMealDetails(mealId) {
   if (res?.success === false) {
     throw new Error(res.message || "Could not fetch meal details.");
   }
-  return res;
+  const d = res?.data ?? res;
+  const rows = Array.isArray(d)
+    ? d
+    : d?.items ?? d?.meal_items ?? Object.values(d ?? {}).find(Array.isArray) ?? [];
+
+  return rows.map((i) => ({
+    id: i.item_id,
+    name: i.food_item,
+    quantity: i.quantity,
+    calories: r1(i.calories),
+    protein: r1(i.protein_gm ?? i.protein_g),
+    carbs: r1(i.carbs_gm ?? i.carbs_g),
+    fats: r1(i.fat_gm ?? i.fat_g),
+    fiber: r1(i.fiber_gm ?? i.fiber_g),
+  }));
 }
