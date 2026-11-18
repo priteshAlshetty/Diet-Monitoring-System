@@ -1,6 +1,6 @@
 import express from 'express';
 import { getMealMacros } from '../utils/gemini_query.js';
-import { insertMealObject } from '../controllers/dms/insertMeal.controller.js';
+import { insertMealObject, getMealDataByMealId, deleteMealBymealId } from '../controllers/dms/insertMeal.controller.js';
 import { getDailyMacros } from "../controllers/dms/getCaloriesData.controller.js";
 import { getDailySummary } from '../controllers/dms/dailySummary.controller.js';
 import { httpError } from '../utils/httpError.js';
@@ -31,7 +31,7 @@ router.post('/ai/meal-macros', async (req, res) => {
 // POST /api/dms/insertMeal
 router.post('/insertMeal', async (req, res) => {
     // Whitelist the fields we accept. Any user_id sent in the body is ignored.
-    const { mealData, meal_type, meal_type_other, eaten_at } = req.body ?? {};
+    const { mealData, meal_type, meal_type_other, eaten_on_date } = req.body ?? {};
 
     if (!Array.isArray(mealData) || mealData.length === 0) {
         throw httpError(400, 'At least one meal item is required.');
@@ -45,7 +45,7 @@ router.post('/insertMeal', async (req, res) => {
         mealData,
         meal_type,
         meal_type_other,
-        eaten_at,
+        eaten_on_date: eaten_on_date,
         user_id: req.user.id   // from the verified access token
     });
 
@@ -58,6 +58,30 @@ router.post('/insertMeal', async (req, res) => {
         message: 'Meal info uploaded successfully.',
         data: result.data
     });
+});
+
+// GET /api/dms/meal/:mealid
+router.get('/meal/:mealid', async (req, res) => {
+    const meal_id = req.params.mealid;
+    const user_id = req.user.id;   // from the verified access token
+    if (!meal_id) {
+        throw httpError(400, 'Missing required parameter mealid');
+    }
+    const mealData = await getMealDataByMealId({ meal_id, user_id });
+
+    return res.status(200).json({ success: true, data: mealData });
+});
+
+//DELETE /api/dms/meal/:mealid
+router.delete('/meal/:mealid', async (req, res) => {
+    const meal_id = req.params.mealid;
+    const user_id = req.user.id;   // from the verified access token
+    if (!meal_id) {
+        throw httpError(400, 'Missing required parameter mealid');
+    }
+    await deleteMealBymealId({ meal_id, user_id });
+
+    return res.status(200).json({ success: true, message: 'Meal deleted successfully.' });
 });
 
 // GET /api/dms/dailyMacros?days=7

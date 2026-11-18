@@ -20,7 +20,7 @@
  *         application/json:
  *           schema:
  *             type: object
- *             required: [meal_type, mealData]
+ *             required: [meal_type, mealData, eaten_on_date]
  *             properties:
  *               meal_type:
  *                 type: string
@@ -29,9 +29,9 @@
  *                 type: string
  *                 nullable: true
  *                 example: null
- *               eaten_at:
+ *               eaten_on_date:
  *                 type: string
- *                 format: date-time
+ *                 format: date
  *               mealData:
  *                 type: array
  *                 minItems: 1
@@ -48,6 +48,7 @@
  *           example:
  *             meal_type: Breakfast
  *             meal_type_other: ''
+ *             eaten_on_date: '2026-10-11'
  *             mealData:
  *               - name: oats
  *                 quantity: 60
@@ -99,6 +100,112 @@
  *             example:
  *               success: false
  *               message: Failed to calculate meal macros.
+ */
+/**
+ * @swagger
+ * /api/dms/meal/{mealid}:
+ *   get:
+ *     summary: Get a meal by ID
+ *     description: Returns the meal only if it belongs to the logged-in user. The user is taken from the access cookie.
+ *     tags: [DMS]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: mealid
+ *         required: true
+ *         description: ID of the meal to retrieve
+ *         schema:
+ *           type: integer
+ *           format: int64
+ *           example: 6
+ *     responses:
+ *       200:
+ *         description: Meal retrieved successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               data:
+ *                 meal_id: "6"
+ *                 user_id: 1
+ *                 meal_type: Breakfast
+ *                 meal_type_other: null
+ *                 meal_name: Oatmeal with Milk and Banana
+ *                 total_calories: "427.00"
+ *                 total_protein_gm: "16.50"
+ *                 total_carbs_gm: "74.50"
+ *                 total_fat_gm: "8.10"
+ *                 total_fiber_gm: "9.30"
+ *                 eaten_at: "2026-10-11T02:30:00.000Z"
+ *                 created_at: "2026-10-11T02:30:00.000Z"
+ *                 raw_json_api:
+ *                   meal_name: Oatmeal with Milk and Banana
+ *                   total:
+ *                     calories_kcal: 427
+ *                     protein_g: 16.5
+ *                     carbs_g: 74.5
+ *                     fat_g: 8.1
+ *                     fiber_g: 9.3
+ *       401:
+ *         description: Not logged in or access token expired (errorCode TOKEN_MISSING, TOKEN_EXPIRED or TOKEN_INVALID)
+ *       404:
+ *         description: Meal not found or does not belong to the logged-in user
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: false
+ *               message: Meal not found.
+ *       500:
+ *         description: Database or server error
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: false
+ *               message: Internal server error
+ */
+/**
+ * @swagger
+ * /api/dms/meal/{mealid}:
+ *   delete:
+ *     summary: Delete a meal by ID
+ *     description: Deletes the meal only if it belongs to the logged-in user. Its meal items are deleted through the database cascade. The user is taken from the access cookie.
+ *     tags: [DMS]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: mealid
+ *         required: true
+ *         description: ID of the meal to delete
+ *         schema:
+ *           type: integer
+ *           format: int64
+ *           example: 6
+ *     responses:
+ *       200:
+ *         description: Meal deleted successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               message: Meal deleted successfully.
+ *       401:
+ *         description: Not logged in or access token expired (errorCode TOKEN_MISSING, TOKEN_EXPIRED or TOKEN_INVALID)
+ *       404:
+ *         description: Meal not found or does not belong to the logged-in user
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: false
+ *               message: Meal not found.
+ *       500:
+ *         description: Database or server error
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: false
+ *               message: Internal server error
  */
 /**
  * @swagger

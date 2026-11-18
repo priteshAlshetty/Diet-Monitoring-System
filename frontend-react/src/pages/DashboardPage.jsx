@@ -21,6 +21,8 @@ export default function DashboardPage() {
   const [date, setDate] = useState(todayIso());
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0); // to make the charts , cards reload
+
 
   const load = useCallback(async () => {
     setError("");
@@ -37,7 +39,9 @@ export default function DashboardPage() {
     if (!window.confirm(`Delete "${meal.name}"?`)) return;
     try {
       await deleteMeal(meal.id);
-      load();
+      await load(); //reloads the meals, stat card, donut, goals, etc.
+      setRefreshKey((prev) => prev + 1); // forces the charts to reload
+
     } catch (e) {
       setError(e.message);
     }
@@ -67,7 +71,7 @@ export default function DashboardPage() {
           <label className="hello__date">
             <Calendar size={18} />
             <input type="date" value={date} max={todayIso()}
-                   onChange={(e) => e.target.value && setDate(e.target.value)} aria-label="Select date" />
+                    onChange={(e) => e.target.value && setDate(e.target.value)} aria-label="Select date" />
           </label>
         </section>
 
@@ -75,22 +79,22 @@ export default function DashboardPage() {
 
         <StatCards totals={data.totals} goals={data.goals} />
 
-        <div className="dash__pair">
-          <MealsList meals={data.meals} onDelete={handleDelete} />
+        <div className="dash__pair" >
+          <MealsList  meals={data.meals} onDelete={handleDelete} />
           <MacroDonut totals={data.totals} />
         </div>
 
-        <CalorieTrend goal={data.goals.calories} />
+        <CalorieTrend goal={data.goals.calories}  refreshKey={refreshKey} />
       </div>
 
       <aside className="dash__side">
         <QuickActions />
-        <TodaysGoals totals={data.totals} goals={data.goals} />
+        <TodaysGoals totals={data.totals} goals={data.goals}  refreshKey={refreshKey} />
         {data.weight && <WeightCard weight={data.weight} />}
       </aside>
 
       <div className="dash__wide">
-        <ProteinMonthChart userId={userId} />
+        <ProteinMonthChart userId={userId} refreshKey={refreshKey} />
       </div>
     </div>
   );

@@ -69,13 +69,16 @@ function validateInput(params) {
             throw createError(`meal_type_other must be at most ${MEAL_TYPE_OTHER_MAX} characters.`, 400);
         }
     }
+    // as per the recieved date from frontend , convert it to pgsql like date time sting format and validate 
+    const eatenOnDate = params.eaten_on_date
+        ? new Date(params.eaten_on_date)
+        : new Date();
 
-    const eatenAt = params.eaten_at ? new Date(params.eaten_at) : new Date();
-    if (Number.isNaN(eatenAt.getTime())) {
-        throw createError('eaten_at is not a valid date.', 400);
+    if (Number.isNaN(eatenOnDate.getTime())) {
+        throw createError('eaten_on_date is not a valid date.', 400);
     }
 
-    return { userId, mealType: params.meal_type, mealTypeOther, eatenAt };
+    return { userId, mealType: params.meal_type, mealTypeOther, eatenOnDate };
 }
 
 /**
@@ -193,7 +196,7 @@ function mapDbError(error) {
 
 async function insertMealObject(params) {
     // ---- 1. Validate input (400) ----
-    const { userId, mealType, mealTypeOther, eatenAt } = validateInput(params);
+    const { userId, mealType, mealTypeOther, eatenOnDate } = validateInput(params);
 
     // ---- 2. Fail fast on unknown user (404), before spending a Gemini call ----
     await assertUserExists(userId);
@@ -202,7 +205,8 @@ async function insertMealObject(params) {
     // Done BEFORE acquiring a transaction connection so a slow API call never holds one.
     const meal_data = await getMealMacros({ meal_items: params.mealData });
     assertValidMealData(meal_data);
-
+    //----- 4. Convert eatOnDate to ISO string (UTC) for PostgreSQL
+    const pgEatOnDate = eatenOnDate.toISOString();
     const mealQuery = `
         INSERT INTO "DMS"."meals" (
             user_id,
@@ -231,7 +235,7 @@ async function insertMealObject(params) {
         meal_data.total.carbs_g,
         meal_data.total.fat_g,
         meal_data.total.fiber_g || 0,
-        eatenAt,
+        pgEatOnDate,
         meal_data
     ];
 
@@ -304,6 +308,50 @@ async function insertMealObject(params) {
     }
 }
 
+/*
+getMealDataByMealId is a function that retrives  that perticular meals data from database if meal_id provided by user is valid and mapped to same user (user to be taken from access token) and returns the meal data in json format to the user. If meal_id is invalid or not mapped to user then it will return 404 error with message "Meal not found."
+
+*/
+async function getMealDataByMealId(params) {
+    const { meal_id, user_id } = params;
+    const query = `
+        SELECT *
+        FROM "DMS".meal_items
+        WHERE meal_id = $1 AND user_id = $2
+        ORDER BY item_id
+        `;
+    const result = await pool.query(query, [meal_id, user_id]);
+    if (result.rowCount === 0) {
+        throw createError('Meal not found.', 404);
+    }
+    else {
+        return result.rows;
+    }
+}
+
+
+/*
+deleteMealByMealId is a function that deletes the meal data from database if meal_id provided by user is valid and mapped to same user (user to be taken from access token) and returns success message to the user. If meal_id is invalid or not mapped to user then it will return 404 error with message "Meal not found."
+*/
+
+async function deleteMealBymealId(params) {
+    const { meal_id, user_id } = params;
+    const query = `
+        DELETE FROM "DMS".meals
+        WHERE meal_id = $1 AND user_id = $2
+        RETURNING *
+        `;
+    const result = await pool.query(query, [meal_id, user_id]);
+    if (result.rowCount === 0) {
+        throw createError('Meal not found.', 404);
+    }
+    else {
+        return { success: true, message: "Meal deleted successfully." }
+    }
+}
+
+
+
 
 /**
  * Direct-run sample test for local debugging.
@@ -334,4 +382,4 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
         .finally(() => pool.end());
 }
 
-export { insertMealObject };
+export { insertMealObject, getMealDataByMealId, deleteMealBymealId };

@@ -43,8 +43,30 @@ export async function getDashboardData({ date }) {
   };
 }
 
-// No backend endpoint yet. Throwing makes the dashboard show a message
-// instead of pretending the meal was deleted.
-export async function deleteMeal() {
-  throw new Error("Deleting meals is not available yet.");
+//delete meal by id 
+export async function deleteMeal(mealId) {
+  if (mealId == null) throw new Error("Meal id is missing.");
+
+  const res = await request(`/api/dms/meal/${encodeURIComponent(mealId)}`, { method: "DELETE" });
+
+  if (res?.success === false) {
+    throw new Error(res.message || "Could not delete the meal.");
+  } else {
+    console.log(`Meal with id ${mealId} deleted successfully.`);
+    return res;
+  }
+}
+
+//get meal detalis by meal id 
+export async function getMealDetails(mealId) {
+  if (mealId == null) throw new Error("Meal id is missing.");
+
+  const res = await request(`/api/dms/meal/${encodeURIComponent(mealId)}`);
+  console.log(" *****************Meal details response:**************");
+  console.log(res);
+  console.log("******************************************************");
+  if (res?.success === false) {
+    throw new Error(res.message || "Could not fetch meal details.");
+  }
+  return res;
 }

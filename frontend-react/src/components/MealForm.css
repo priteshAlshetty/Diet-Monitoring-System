@@ -2,9 +2,28 @@
   padding: 24px; color: var(--ink); background: var(--paper);
   border: 1px solid var(--line); border-radius: 10px;
 }
-.meal h2 { margin: 0 0 16px; font-size: 1.4rem; font-weight: 600; }
+.meal__header {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px; margin-bottom: 16px;
+}
+.meal h2 { margin: 0; font-size: 1.4rem; font-weight: 600; }
+.eaten_on {
+  display: flex; align-items: center; gap: 10px; margin-left: auto;
+  background: transparent;
+}
+.eaten_on label {  font-size: .9rem; font-weight: 600; }
+.eaten_on input {
+  min-width: 0; padding: 6px 8px; border: 1px solid #c9d9cf;
+  border-radius: 7px; background: var(--paper); color: var(--ink);
+}
+.eaten_on input:focus-visible {
+  outline: 2px solid var(--leaf); outline-offset: 2px;
+  
+}
 
-.meal__types { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.meal__types { display: flex; flex-wrap: wrap; gap: 8px; gap: 10px;
+    margin-top: 2.2rem;
+    margin-bottom: 1rem; }
 .chip {
   padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px;
   background: transparent; color: var(--ink); cursor: pointer;
@@ -41,6 +60,8 @@
 
 :is(.chip, .field, .btn, .row__remove):focus-visible { outline: 2px solid var(--leaf); outline-offset: 2px; }
 @media (max-width: 480px) {
+  .meal__header { align-items: flex-start; flex-direction: column; }
+  .eaten_on { align-self: flex-end; }
   .row { grid-template-columns: 1fr 1fr 32px; }
   .row__name { grid-column: 1 / -1; }
 }

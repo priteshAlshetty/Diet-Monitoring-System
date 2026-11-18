@@ -16,6 +16,7 @@ export default function MealForm({ onSaved }) {
   const [items, setItems] = useState(blankItems);
   const [status, setStatus] = useState({ state: "idle", message: "" });
   const [saved, setSaved] = useState(null); // full response body from insertMeal; shown in the overlay
+  const [eatenOn, setEatenOn] = useState(new Date().toISOString().slice(0, 10)); // YYYY-MM-DD
 
   const updateItem = (id, field, value) =>
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, [field]: value } : i)));
@@ -43,6 +44,7 @@ export default function MealForm({ onSaved }) {
     const payload = {
       meal_type: mealType,
       meal_type_other: mealType === "Other" ? mealTypeOther.trim() : "",
+      eaten_on: eatenOn,
       mealData: filledItems.map(({ name, quantity, unit }) => ({
         name: name.trim(),
         quantity: Number(quantity),
@@ -73,7 +75,18 @@ export default function MealForm({ onSaved }) {
 
   return (
     <section className="meal" aria-labelledby="meal-title">
-      <h2 id="meal-title">Log a meal</h2>
+      <div className="meal__header">
+        <h2 id="meal-title">Log your meal !!😋😋</h2>
+        <div className="eaten_on" role="group" aria-label="Meal date">
+          <label htmlFor="eaten_on"><h2>Date:</h2></label>
+          <input
+            type="date"
+            id="eaten_on"
+            value={eatenOn}
+            onChange={(e) => setEatenOn(e.target.value)}
+          />
+        </div>
+      </div>
 
       <div className="meal__types" role="radiogroup" aria-label="Meal type">
         {MEAL_TYPES.map((t) => (
