@@ -2,7 +2,7 @@
 import { request } from "../api/client";
 
 // POST /api/dms/insertMeal
-// body: { meal_type, meal_type_other, mealData: [{ name, quantity, unit }] }
+// body: { meal_type, meal_type_other, eaten_on, mealData: [{ name, quantity, unit }] }
 // Do NOT send user_id: the server takes the user from the access cookie and ignores it.
 //
 // 201 -> { success, message, data: { meal_id, user_id, meal_type, meal_name,
@@ -10,12 +10,12 @@ import { request } from "../api/client";
 // 400 { success:false, message } missing meal_type / mealData
 // 401 not logged in or token expired (the client refreshes and retries automatically)
 // 500 database or server error, 502 nutrition macro service failed
-export async function insertMeal({ meal_type, meal_type_other, mealData }) {
+export async function insertMeal({ meal_type, meal_type_other, eaten_on, mealData }) {
   let res;
   try {
     res = await request("/api/dms/insertMeal", {
       method: "POST",
-      body: { meal_type, meal_type_other, mealData },
+      body: { meal_type, meal_type_other, eaten_on, mealData },
     });
   } catch (e) {
     console.dir(e); // failed response: e.status, e.code, e.message

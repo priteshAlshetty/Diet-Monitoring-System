@@ -31,7 +31,7 @@ router.post('/ai/meal-macros', async (req, res) => {
 // POST /api/dms/insertMeal
 router.post('/insertMeal', async (req, res) => {
     // Whitelist the fields we accept. Any user_id sent in the body is ignored.
-    const { mealData, meal_type, meal_type_other, eaten_on_date } = req.body ?? {};
+    const { mealData, meal_type, meal_type_other, eaten_on, eaten_on_date } = req.body ?? {};
 
     if (!Array.isArray(mealData) || mealData.length === 0) {
         throw httpError(400, 'At least one meal item is required.');
@@ -45,7 +45,7 @@ router.post('/insertMeal', async (req, res) => {
         mealData,
         meal_type,
         meal_type_other,
-        eaten_on_date: eaten_on_date,
+        eaten_on_date: eaten_on === undefined ? eaten_on_date : eaten_on,
         user_id: req.user.id   // from the verified access token
     });
 

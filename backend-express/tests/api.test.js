@@ -530,6 +530,7 @@ const invalidInsertBodies = [
     null,
     {},
     { meal_type: 'Lunch' },
+    { mealData: [{ name: 'rice' }], meal_type: 'Lunch' },
     { mealData: [], meal_type: 'Lunch' },
     { mealData: null, meal_type: 'Lunch' },
     { mealData: {}, meal_type: 'Lunch' },
@@ -560,12 +561,12 @@ const invalidExtraFieldBodies = [
     { meal_type_other: [] },
     { meal_type_other: 'x'.repeat(51) },
     { meal_type_other: 'y'.repeat(80) },
-    { eaten_at: 'not-a-date' },
-    { eaten_at: '2026-99-99T99:99:99Z' },
-    { eaten_at: 'yesterday-ish' },
-    { eaten_at: {} },
-    { eaten_at: [] },
-    { eaten_at: '2026-13-40' }
+    { eaten_on_date: 'not-a-date' },
+    { eaten_on_date: '2026-99-99T99:99:99Z' },
+    { eaten_on_date: 'yesterday-ish' },
+    { eaten_on_date: {} },
+    { eaten_on_date: [] },
+    { eaten_on_date: '2026-13-40' }
 ];
 
 addStatusTests(
@@ -583,6 +584,7 @@ addStatusTests(
                 }
             ],
             meal_type: 'Lunch',
+            eaten_on_date: '2026-11-21',
             ...extra
         },
         status: 400

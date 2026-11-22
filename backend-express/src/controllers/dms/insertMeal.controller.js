@@ -69,10 +69,14 @@ function validateInput(params) {
             throw createError(`meal_type_other must be at most ${MEAL_TYPE_OTHER_MAX} characters.`, 400);
         }
     }
-    // as per the recieved date from frontend , convert it to pgsql like date time sting format and validate 
-    const eatenOnDate = params.eaten_on_date
-        ? new Date(params.eaten_on_date)
-        : new Date();
+    const date = params.eaten_on_date;
+    if (date === undefined || date === null) {
+        throw createError('eaten_on_date is required.', 400);
+    }
+    if (typeof date !== 'string' && !(date instanceof Date)) {
+        throw createError('eaten_on_date is not a valid date.', 400);
+    }
+    const eatenOnDate = new Date(date);
 
     if (Number.isNaN(eatenOnDate.getTime())) {
         throw createError('eaten_on_date is not a valid date.', 400);
@@ -365,7 +369,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
             { name: 'dal', quantity: 200, unit: 'g' },
             { name: 'spinach', quantity: 1, unit: 'cup' },
         ],
-        eaten_at: new Date(),
+        eaten_on_date: new Date(),
         user_id: 1
     };
 
